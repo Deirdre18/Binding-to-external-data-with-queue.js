@@ -1,0 +1,83 @@
+<!--This 'Binding to External Data with Queue.js lesson (from Code Institute Full-Stack Diploma course). Transcription from lessons, included in comments sections in the code. -->
+
+
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <!--Binding with Queue.js - More often than not, rather than having your data embedded in the same file - your HTML file - in the form of an array, you'll generally be reading your data from an external source. It may be from an external file locally on your project or on your desktop. Or you may be reading it live from from a database or through an API(an application Programming Interface). In this example we're going to look at how you bind data that lives in an external file to our charts.-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>D3 and Scalable Vector Graphics</title>
+
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/dc/2.1.8/dc.min.css"/>
+    <style>
+        div {
+            clear: left;
+        }
+    </style>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.12/crossfilter.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dc/2.1.8/dc.js"></script>
+    
+    <!--Binding with Queue.js - so the first thing we do is we create a new directory called data using the MK der then we change directory to data and we're going to access some data from our github account and you can do that very easy using cloud 9 using clever little utility called wget and that will allow you to pull in files across HTTP and download into a particular location and our case is going to download to our data directory and there we have the data. one thing we need to make sure next is that our dashboards don't render before the data is available there can be a lag if we're accessing from a database or across the wire so one of the things we use is yet another library called 'QUEUE' and that again was written by Mike Bostock, the creator of d3 and it allows you to defer calling a function until the data is ready. -->
+    
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/queue-async/1.0.7/queue.min.js"></script>
+
+</head>
+<body>
+    <h1>Data Visualisation</h1>
+
+    <h2>DC BarChart</h2>
+
+    <div>
+        <h3>Chart</h3>
+        <div id="per-person-chart"></div>
+    </div>
+
+    <script>
+    
+    //  Binding with Queue.js - so in our case we've downloaded and added a script reference to 'QUEUE.JS' you from the content delivery network (CDN) and then we're deferring JSON content, and we refer to its location (it's a file call 'transactions.jJSON' and it lives in our data folder, so basically what's happening in the lines below, it says go and get transactions.JSON file in the data folder and bring it back in the form of d3.JSON.
+    
+    //  Binding with Queue.js - when that's finished when that's successful, call a method, and in our case it's called make graphs (it can be whatever you call it yourself), it's whatever you refer to inside in our await. So one of two things will happen (1) either the data will return or (2) you will you get an error and we can deal with the error. We can put exception handling in there if the data fails to load in some way, but we'll assume that the data will download and once that's done, it will appear or be injected into the transactions data parameter inside in our custom made function called make graphs. 
+    
+    queue()
+        .defer(d3.json, "data/transactions.json")
+        .await(makeGraphs);
+
+    //  Binding with Queue.js - Whatever you call the function inside in our await must match our custom function. After that normal service resumes and what I mean by that is you create a new cross filter object. 
+   
+    function makeGraphs(error, transactionsData) {
+        var ndx = crossfilter(transactionsData);
+        
+    //  Binding with Queue.js - Then you create a new dimension. In our case we're using the names, and then we group and sum. Based on that dimension, we then use DC object, and in our case again we're creating a bar chart. We're binding that to a particular div in order to render that bar chart. 
+    
+        var name_dim = ndx.dimension(dc.pluck('name'));
+        
+     
+        var total_spend_per_person = name_dim.group().reduceSum(dc.pluck('spend'));
+        
+    //  Binding with Queue.js - We're creating a bar chart. We're binding that to a particular div in order to render that bar chart. We make sure our dimensions match our dimension for example created in above, in which we created our chart.
+    
+        dc.barChart("#per-person-chart")
+            .width(300)
+            .height(150)
+            .margins({top: 10, right: 50, bottom: 30, left: 50})
+            .dimension(name_dim)
+            .group(total_spend_per_person)
+            .transitionDuration(500)
+            .x(d3.scale.ordinal())
+            .xUnits(dc.units.ordinal)
+            .xAxisLabel("Person")
+            .yAxis().ticks(4);
+            
+    //  Binding with Queue.js - Now one thing I didn't mention up till now is in order to render the chart you call DC render all, this must be called in order to render the charts. Let's test it and there we have it, binding external data to our charts.
+    
+        dc.renderAll();
+    }
+    </script>
+</body>
+</html>
