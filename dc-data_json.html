@@ -45,6 +45,9 @@
     //  Binding with Queue.js - when that's finished when that's successful, call a method, and in our case it's called make graphs (it can be whatever you call it yourself), it's whatever you refer to inside in our await. So one of two things will happen (1) either the data will return or (2) you will you get an error and we can deal with the error. We can put exception handling in there if the data fails to load in some way, but we'll assume that the data will download and once that's done, it will appear or be injected into the transactions data parameter inside in our custom made function called make graphs. 
     
     queue()
+    
+    //  Binding with Queue.js - Before we retrieve our json data, we need to use "mkdir data" on the command line and then "cd data" to change directory.  Then to quickly retrieve transactions.json data from GitHub, we use "wget https://raw.githubusercontent.com/Code-Institute-Solutions/DataVisualisation/master/data/transactions.json" to retrieve our raw json data". 
+    
         .defer(d3.json, "data/transactions.json")
         .await(makeGraphs);
 
